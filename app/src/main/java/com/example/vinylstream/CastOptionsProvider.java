@@ -5,12 +5,13 @@ import com.google.android.gms.cast.framework.CastOptions;
 import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
 import java.util.List;
+import android.util.Log;
 
 public class CastOptionsProvider implements OptionsProvider {
 
     @Override
     public CastOptions getCastOptions(Context context) {
-        // Replace "YOUR_APPLICATION_ID" with your actual receiver application ID.
+        Log.d("CastOptionsProvider", "Configuring CastOptions");
         return new CastOptions.Builder()
                 .setReceiverApplicationId("E023FBC2")
                 .build();
