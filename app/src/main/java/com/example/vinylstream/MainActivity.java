@@ -5,6 +5,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer;
