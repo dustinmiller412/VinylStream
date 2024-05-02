@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private Button pauseButton;
     private Button stopButton;
     private TextView streamStatusText;
+    private TextView castStatusText;  // TextView for displaying the cast status
     private CastContext castContext;
     private CastStateListener castStateListener;
 
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         pauseButton = findViewById(R.id.pauseButton);
         stopButton = findViewById(R.id.stopButton);
         streamStatusText = findViewById(R.id.stream_status);
+        castStatusText = findViewById(R.id.cast_status);  // Initialize the cast status TextView
 
         playButton.setOnClickListener(v -> {
             if (!mediaPlayer.isPlaying()) {
@@ -62,20 +64,39 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setOnClickListener(v -> {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
-                setupMediaPlayer(); // Prepare the media player again after stopping
+                setupMediaPlayer();
             }
         });
 
-        // Initialize the Cast context
-        castContext = CastContext.getSharedInstance(this);
+        // Initialize the cast context
+        try {
+            castContext = CastContext.getSharedInstance(this);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Failed to load CastContext", e);
+        }
 
         // Cast state listener to update UI based on casting status
         castStateListener = newState -> {
-            if (newState != CastState.NO_DEVICES_AVAILABLE) {
-                streamStatusText.setText("Cast device detected");
-            } else {
-                streamStatusText.setText("No Cast devices available");
+            String status;
+            switch (newState) {
+                case CastState.NO_DEVICES_AVAILABLE:
+                    status = "No Cast devices available";
+                    break;
+                case CastState.NOT_CONNECTED:
+                    status = "Cast device not connected";
+                    break;
+                case CastState.CONNECTING:
+                    status = "Connecting to Cast device";
+                    break;
+                case CastState.CONNECTED:
+                    status = "Cast device connected";
+                    break;
+                default:
+                    status = "Status Unknown";
+                    break;
             }
+            final String finalStatus = status;
+            runOnUiThread(() -> castStatusText.setText(finalStatus));
         };
 
         checkStreamStatus();
@@ -84,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupMediaPlayer() {
         try {
             mediaPlayer.setDataSource("http://192.168.1.67:8000/stream");
-            mediaPlayer.prepareAsync(); // Prepare asynchronously to not block the main thread
+            mediaPlayer.prepareAsync();
         } catch (IOException e) {
             streamStatusText.setText("Error setting data source");
             streamStatusText.setTextColor(Color.RED);
@@ -135,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
-
 
     @Override
     protected void onResume() {

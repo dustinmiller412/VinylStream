@@ -7,49 +7,77 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary">
-        <androidx.mediarouter.app.MediaRouteButton
-            android:id="@+id/media_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.mediarouter.app.MediaRouteButton
+                android:id="@+id/media_route_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:layout_toEndOf="@id/media_route_button">
+
+                <TextView
+                    android:id="@+id/stream_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Checking stream status..."
+                    android:textColor="@android:color/white"
+                    android:textAlignment="center"/>
+
+                <TextView
+                    android:id="@+id/cast_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cast status..."
+                    android:textColor="@android:color/white"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+        </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <Button
-        android:id="@+id/playButton"
+    <LinearLayout
+        android:id="@+id/button_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play"
-        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
         android:layout_below="@id/toolbar"
-        android:layout_marginTop="16dp"
-        android:enabled="false"/>
-
-    <Button
-        android:id="@+id/pauseButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pause"
-        android:layout_below="@id/playButton"
-        android:layout_marginTop="16dp"
-        android:layout_centerHorizontal="true"/>
-
-    <Button
-        android:id="@+id/stopButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Stop"
-        android:layout_below="@id/pauseButton"
-        android:layout_marginTop="16dp"
-        android:layout_centerHorizontal="true"/>
-
-    <TextView
-        android:id="@+id/stream_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Checking stream status..."
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="16dp">
 
+        <Button
+            android:id="@+id/playButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play"
+            android:enabled="false"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/pauseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pause"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stop"/>
+    </LinearLayout>
 
 </RelativeLayout>
