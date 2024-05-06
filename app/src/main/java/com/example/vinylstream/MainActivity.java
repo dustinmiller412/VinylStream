@@ -4,14 +4,20 @@ import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.mediarouter.app.MediaRouteButton;
+
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaLoadRequestData;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -27,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView castStatusText;  // TextView for displaying the cast status
     private CastContext castContext;
     private CastStateListener castStateListener;
+    private MediaRouteButton mediaRouteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
         setupMediaPlayer();
 
+        mediaRouteButton = findViewById(R.id.media_route_button);
+        CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), mediaRouteButton);
+
         playButton = findViewById(R.id.playButton);
         pauseButton = findViewById(R.id.pauseButton);
         stopButton = findViewById(R.id.stopButton);
         streamStatusText = findViewById(R.id.stream_status);
-        castStatusText = findViewById(R.id.cast_status);  // Initialize the cast status TextView
+        castStatusText = findViewById(R.id.cast_status);
 
         playButton.setOnClickListener(v -> {
             if (!mediaPlayer.isPlaying()) {
@@ -68,36 +78,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Initialize the cast context
         try {
             castContext = CastContext.getSharedInstance(this);
         } catch (Exception e) {
             Log.e("MainActivity", "Failed to load CastContext", e);
         }
 
-        // Cast state listener to update UI based on casting status
         castStateListener = newState -> {
+            Log.d("CastDebug", "New cast state: " + newState);
             String status;
             switch (newState) {
                 case CastState.NO_DEVICES_AVAILABLE:
                     status = "No Cast devices available";
                     break;
                 case CastState.NOT_CONNECTED:
-                    status = "Cast device not connected";
+                    status = "Cast device detected but not connected";
                     break;
                 case CastState.CONNECTING:
                     status = "Connecting to Cast device";
                     break;
                 case CastState.CONNECTED:
                     status = "Cast device connected";
+                    startCasting();  // Start casting when connected
                     break;
                 default:
                     status = "Status Unknown";
                     break;
             }
             final String finalStatus = status;
-            runOnUiThread(() -> castStatusText.setText(finalStatus));
+            runOnUiThread(() -> {
+                castStatusText.setText(finalStatus);
+                Log.d("CastDebug", "Status updated: " + finalStatus);
+            });
         };
+
+        castContext.addCastStateListener(castStateListener);
 
         checkStreamStatus();
     }
@@ -124,6 +139,20 @@ public class MainActivity extends AppCompatActivity {
             setupMediaPlayer();
             return true;
         });
+    }
+
+    private void startCasting() {
+        MediaInfo mediaInfo = new MediaInfo.Builder("http://192.168.1.67:8000/stream")
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType("audio/mpeg")
+                .build();
+        RemoteMediaClient remoteMediaClient = castContext.getSessionManager().getCurrentCastSession().getRemoteMediaClient();
+        if (remoteMediaClient != null) {
+            remoteMediaClient.load(new MediaLoadRequestData.Builder()
+                    .setMediaInfo(mediaInfo)
+                    .setAutoplay(true)
+                    .build());
+        }
     }
 
     private void checkStreamStatus() {
